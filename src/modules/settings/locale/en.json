@@ -1,0 +1,19 @@
+{
+    "settings": "SETTINGS",
+    "settings.billing.plans": "BILLING AND PLANS",
+    "settings.edit.billing.info": "EDIT BILLING INFO",
+    "settings.edit.billing.infoLower": "Edit Billing Info",
+    "settings.edit.form": "#F5F5F5",
+    "settings.edit.companyName": "Company Name",
+    "settings.edit.attnName": "Attn Name",
+    "settings.edit.billingEmail": "Billing Email",
+    "settings.edit.phoneNumber": "Phone Number",
+    "settings.edit.address1": "Address(line 1)",
+    "settings.edit.address2": "Address(line 2)",
+    "settings.edit.country": "Country",
+    "settings.edit.zipeCode": "Zipe Code",
+    "settings.edit.state": "State",
+    "settings.edit.city": "City",
+    "settings.edit.optional": "Optional"
+  }
+  
