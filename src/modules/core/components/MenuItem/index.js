@@ -19,10 +19,16 @@ const MenuItem = (props) => {
     ...restProps
   } = props
 
+  const clickHandler = () => {
+    if (typeof onClick === 'function') {
+      onClick()
+    }
+  }
+
   return (
     <StyledMenuItem
       selected={selected}
-      onClick={onClick}
+      onClick={clickHandler}
       $width={width}
       $isTitle={isTitle}
       $withBorderTop={withBorderTop}
@@ -44,8 +50,8 @@ const MenuItem = (props) => {
 }
 
 MenuItem.propTypes = {
-  text: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
+  text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+  onClick: PropTypes.func,
   icon: PropTypes.node,
   selected: PropTypes.bool,
   withSelectionIcon: PropTypes.bool,
@@ -61,6 +67,7 @@ MenuItem.defaultProps = {
   width: null,
   isTitle: false,
   withBorderTop: false,
+  onClick: null,
 }
 
 export default MenuItem
