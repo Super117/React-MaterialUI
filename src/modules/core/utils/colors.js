@@ -33,5 +33,6 @@ export const colors = {
   white_smoke: '#F5F5F5',
   purple: '#696FE4',
   grey_blue: '#486581',
+  dark_grey_blue: '#7f96ad',
   white_blue: '#bfd0ff',
 }
