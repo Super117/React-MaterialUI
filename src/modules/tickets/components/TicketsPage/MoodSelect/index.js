@@ -1,14 +1,15 @@
 import React from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import qs from 'query-string'
+import PropTypes from 'prop-types'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import MenuItem from 'modules/core/components/MenuItem'
 import FilterSelect from '../FilterSelect'
 
-const MoodSelect = () => {
+const MoodSelect = (props) => {
+  const { mood, onSelect } = props
+
   const { formatMessage } = useIntl()
 
   const moods = [
@@ -17,45 +18,23 @@ const MoodSelect = () => {
         id: 'tickets.mood.sad',
         defaultMessage: 'sad',
       }),
-      icon: <FontAwesomeIcon icon={['fal', 'frown']} />,
+      icon: <FontAwesomeIcon icon={['far', 'frown']} />,
     },
     {
       name: formatMessage({
         id: 'tickets.mood.neutral',
         defaultMessage: 'neutral',
       }),
-      icon: <FontAwesomeIcon icon={['fal', 'meh']} />,
+      icon: <FontAwesomeIcon icon={['far', 'meh']} />,
     },
     {
       name: formatMessage({
         id: 'tickets.mood.happy',
         defaultMessage: 'happy',
       }),
-      icon: <FontAwesomeIcon icon={['fal', 'smile']} />,
+      icon: <FontAwesomeIcon icon={['far', 'smile']} />,
     },
   ]
-
-  const { search } = useLocation()
-  const history = useHistory()
-
-  const parsedQueryStrings = qs.parse(search)
-
-  const { mood } = parsedQueryStrings
-
-  const changeMood = (newMood) => {
-    const newQueryStrings = {
-      ...parsedQueryStrings,
-      mood: newMood,
-    }
-
-    if (!newMood) {
-      delete newQueryStrings.mood
-    }
-
-    history.push({
-      search: qs.stringify(newQueryStrings),
-    })
-  }
 
   const selectedItemIcon = moods.find((item) => item.name === mood)?.icon
 
@@ -63,7 +42,7 @@ const MoodSelect = () => {
     mood && selectedItemIcon ? (
       selectedItemIcon
     ) : (
-      <FontAwesomeIcon icon={['fal', 'meh-blank']} />
+      <FontAwesomeIcon icon={['far', 'meh-blank']} />
     )
 
   return (
@@ -82,12 +61,12 @@ const MoodSelect = () => {
               id: 'tickets.any.mood',
               defaultMessage: 'any mood',
             })}
-            icon={<FontAwesomeIcon icon={['fal', 'meh-blank']} />}
+            icon={<FontAwesomeIcon icon={['far', 'meh-blank']} />}
             selected={!mood}
             withSelectionIcon
             width={194}
             onClick={() => {
-              changeMood(null)
+              onSelect(null)
               closeDropdown()
             }}
           />
@@ -104,7 +83,7 @@ const MoodSelect = () => {
                 withSelectionIcon
                 width={194}
                 onClick={() => {
-                  changeMood(item.name)
+                  onSelect(item.name)
                   closeDropdown()
                 }}
               />
@@ -114,6 +93,15 @@ const MoodSelect = () => {
       )}
     </FilterSelect>
   )
+}
+
+MoodSelect.propTypes = {
+  mood: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+}
+
+MoodSelect.defaultProps = {
+  mood: null,
 }
 
 export default MoodSelect

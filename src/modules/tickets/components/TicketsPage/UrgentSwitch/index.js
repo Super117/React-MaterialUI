@@ -1,39 +1,16 @@
 import React from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
-import qs from 'query-string'
+import PropTypes from 'prop-types'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { FormattedMessage } from 'react-intl'
 import { StyledSelectButton } from './style'
 
-const UrgentSwitch = () => {
-  const { search } = useLocation()
-  const history = useHistory()
-
-  const parsedQueryStrings = qs.parse(search)
-
-  const { urgent } = parsedQueryStrings
-
-  const isActive = urgent === '1'
-
-  const toggle = () => {
-    const newQueryStrings = {
-      ...parsedQueryStrings,
-      urgent: isActive ? '0' : '1',
-    }
-
-    if (isActive) {
-      delete newQueryStrings.urgent
-    }
-
-    history.push({
-      search: qs.stringify(newQueryStrings),
-    })
-  }
+const UrgentSwitch = (props) => {
+  const { isActive, onChange } = props
 
   return (
-    <StyledSelectButton variant="text" $isActive={isActive} onClick={toggle}>
+    <StyledSelectButton variant="text" $isActive={isActive} onClick={onChange}>
       <div className="tickets_UrgentSwitch_icon">
         {isActive ? (
           <FontAwesomeIcon icon={['fas', 'exclamation-triangle']} />
@@ -47,6 +24,11 @@ const UrgentSwitch = () => {
       </div>
     </StyledSelectButton>
   )
+}
+
+UrgentSwitch.propTypes = {
+  isActive: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
 }
 
 export default UrgentSwitch

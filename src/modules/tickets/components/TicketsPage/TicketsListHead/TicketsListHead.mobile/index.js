@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { useIntl, FormattedMessage } from 'react-intl'
 import qs from 'query-string'
@@ -11,11 +11,15 @@ import {
   Box,
   InputBase,
   useMediaQuery,
+  Drawer,
 } from '@material-ui/core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import { useTicketsFilters } from 'modules/tickets/hooks/useTicketsFilters'
+
 import CheckboxDropdown from '../../CheckboxDropdown'
 import ActionsDropdown from '../../ActionsDropdown'
+import TicketsMobileFilters from '../../TicketsMobileFilters'
 
 import {
   StyledTicketsHeaderMobile,
@@ -52,8 +56,17 @@ const titleMap = {
 const MobileTicketsListHead = (props) => {
   const { children, toggleSideMenu } = props
 
+  const [showFiltersMenu, setFiltersMenu] = useState(false)
+
   const { formatMessage } = useIntl()
   const isTabletUpScreen = useMediaQuery((theme) => theme.breakpoints.up('sm'))
+
+  const {
+    filters,
+    setFilter,
+    applyFilters,
+    activeFiltersCount,
+  } = useTicketsFilters()
 
   const { search } = useLocation()
   const history = useHistory()
@@ -80,6 +93,8 @@ const MobileTicketsListHead = (props) => {
       search: qs.stringify(newQueryStrings),
     })
   }
+
+  const toggleFiltersMenu = () => setFiltersMenu((curr) => !curr)
 
   if (search_active === '1') {
     return (
@@ -127,7 +142,6 @@ const MobileTicketsListHead = (props) => {
                 variant="h1"
                 className="tickets_MobileTicketsHeader_title"
                 noWrap
-                unselectable
               >
                 {isTabletUpScreen &&
                   `${formatMessage({
@@ -168,6 +182,7 @@ const MobileTicketsListHead = (props) => {
               <div>
                 <Button
                   className="tickets_MobileTicketsHeader_filters-button"
+                  onClick={toggleFiltersMenu}
                   startIcon={
                     <FontAwesomeIcon
                       className="tickets_MobileTicketsHeader_filters-button-icon"
@@ -175,9 +190,11 @@ const MobileTicketsListHead = (props) => {
                     />
                   }
                   endIcon={
-                    <span className="tickets_MobileTicketsHeader_filters-count">
-                      2
-                    </span>
+                    activeFiltersCount > 0 && (
+                      <span className="tickets_MobileTicketsHeader_filters-count">
+                        {activeFiltersCount}
+                      </span>
+                    )
                   }
                 >
                   Filters
@@ -187,6 +204,15 @@ const MobileTicketsListHead = (props) => {
           </div>
         </StyledTicketsHeaderMobile>
       </StyledAppBar>
+
+      <Drawer open={showFiltersMenu} onOpen={toggleFiltersMenu} anchor="right">
+        <TicketsMobileFilters
+          filters={filters}
+          setFilter={setFilter}
+          applyFilters={applyFilters}
+          onBackClick={toggleFiltersMenu}
+        />
+      </Drawer>
 
       <StyledContent>{children}</StyledContent>
     </>

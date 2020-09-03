@@ -1,134 +1,61 @@
-import React, { useEffect, useMemo, useCallback, useState } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
+import React, { useEffect, useCallback, useState } from 'react'
 import { useIntl } from 'react-intl'
-import qs from 'query-string'
+import PropTypes from 'prop-types'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import {
+  TimesEnum,
+  getDateRangeLabel,
+  isInvalidRange,
+  times,
+} from 'modules/tickets/utils/timeSelectHelpers'
+
 import MenuItem from 'modules/core/components/MenuItem'
 import FilterSelect from '../FilterSelect'
-import DateRangePicker from './DateRangePicker'
+import DatePicker from './DatePicker'
 
-import { TimesEnum, getDateRangeLabel, isInvalidRange } from './helpers'
+const { CUSTOM_RANGE } = TimesEnum
 
-const {
-  WITHIN_ONE_HOUR,
-  TODAY,
-  LAST_THREE_DAYS,
-  THIS_WEEK,
-  THIS_MONTH,
-  LAST_MONTH,
-  CUSTOM_RANGE,
-} = TimesEnum
+const TimeSelect = (props) => {
+  const { time, startDate, endDate, setTime, setStartDate, setEndDate } = props
 
-const TimeSelect = () => {
   const { formatMessage } = useIntl()
-
-  const times = [
-    {
-      name: formatMessage({
-        id: 'tickets.within.one.hour',
-        defaultMessage: 'Within 1 hour',
-      }),
-      id: WITHIN_ONE_HOUR,
-    },
-    {
-      name: formatMessage({ id: 'tickets.today', defaultMessage: 'Today' }),
-      id: TODAY,
-    },
-    {
-      name: formatMessage({
-        id: 'tickets.last.three.days',
-        defaultMessage: 'Last 3 days',
-      }),
-      id: LAST_THREE_DAYS,
-    },
-    {
-      name: formatMessage({
-        id: 'tickets.this.week',
-        defaultMessage: 'This week',
-      }),
-      id: THIS_WEEK,
-    },
-    {
-      name: formatMessage({
-        id: 'tickets.this.month',
-        defaultMessage: 'This month',
-      }),
-      id: THIS_MONTH,
-    },
-    {
-      name: formatMessage({
-        id: 'tickets.last.month',
-        defaultMessage: 'Last month',
-      }),
-      id: LAST_MONTH,
-    },
-  ]
 
   const [isDatePickerVisible, showDatePicker] = useState(false)
 
-  const { search } = useLocation()
-  const history = useHistory()
-
-  const parsedQueryStrings = useMemo(() => qs.parse(search), [search])
-
-  const { time, dt_from, dt_till } = parsedQueryStrings
-
-  const setTime = useCallback(
-    (newTime, startDate, endDate) => {
-      const newQueryStrings = {
-        ...parsedQueryStrings,
-        time: newTime,
-      }
-
-      delete newQueryStrings.dt_from
-      delete newQueryStrings.dt_till
-
-      if (newTime === CUSTOM_RANGE) {
-        if (startDate) newQueryStrings.dt_from = startDate
-        if (endDate) newQueryStrings.dt_till = endDate
-      }
-
-      history.push({
-        search: qs.stringify(newQueryStrings),
-      })
+  const changeHandler = useCallback(
+    (newTime, newStartDate, newEndDate) => {
+      setTime(newTime)
+      setStartDate(newStartDate)
+      setEndDate(newEndDate)
     },
-    [history, parsedQueryStrings]
+    [setEndDate, setStartDate, setTime]
   )
 
   const clearTime = useCallback(() => {
-    const newQueryStrings = {
-      ...parsedQueryStrings,
-    }
-
-    delete newQueryStrings.dt_from
-    delete newQueryStrings.dt_till
-    delete newQueryStrings.time
-
-    history.push({
-      search: qs.stringify(newQueryStrings),
-    })
-  }, [history, parsedQueryStrings])
+    setTime(null)
+    setStartDate(null)
+    setEndDate(null)
+  }, [setEndDate, setStartDate, setTime])
 
   // clear values if url dates are invalid
   useEffect(() => {
-    const missingRange = time === CUSTOM_RANGE && !dt_from && !dt_till
+    const missingRange = time === CUSTOM_RANGE && !startDate && !endDate
     const invalidTimeValue = time && !Object.values(TimesEnum).includes(time)
     const invalidRange =
-      (dt_from || dt_till) &&
-      isInvalidRange({ startDate: dt_from, endDate: dt_till })
+      (startDate || endDate) && isInvalidRange({ startDate, endDate })
 
     if (missingRange || invalidRange || invalidTimeValue) {
       clearTime()
     }
-  }, [clearTime, dt_from, dt_till, time])
+  }, [clearTime, endDate, startDate, time])
 
   const getSelectedLabel = () => {
     if (time === CUSTOM_RANGE) {
       return getDateRangeLabel({
-        startDate: dt_from,
-        endDate: dt_till,
+        startDate,
+        endDate,
         afterLabel: formatMessage({
           id: 'tickets.after',
           defaultMessage: 'after',
@@ -156,12 +83,12 @@ const TimeSelect = () => {
       {(closeDropdown) => {
         if (isDatePickerVisible) {
           return (
-            <DateRangePicker
-              startDate={time === CUSTOM_RANGE ? dt_from : null}
-              endDate={time === CUSTOM_RANGE ? dt_till : null}
+            <DatePicker
+              startDate={startDate}
+              endDate={endDate}
               back={() => showDatePicker(false)}
               onApply={(pickerStartDate, pickerEndDate) => {
-                setTime(CUSTOM_RANGE, pickerStartDate, pickerEndDate)
+                changeHandler(CUSTOM_RANGE, pickerStartDate, pickerEndDate)
                 closeDropdown()
               }}
             />
@@ -187,7 +114,7 @@ const TimeSelect = () => {
 
             {/* Options */}
             {times.map((item) => {
-              const isSelected = item.name === time
+              const isSelected = item.id === time
 
               return (
                 <MenuItem
@@ -197,7 +124,7 @@ const TimeSelect = () => {
                   width={194}
                   withSelectionIcon
                   onClick={() => {
-                    setTime(item.id)
+                    changeHandler(item.id)
                     closeDropdown()
                   }}
                 />
@@ -223,6 +150,21 @@ const TimeSelect = () => {
       }}
     </FilterSelect>
   )
+}
+
+TimeSelect.propTypes = {
+  time: PropTypes.string,
+  startDate: PropTypes.string,
+  endDate: PropTypes.string,
+  setTime: PropTypes.func.isRequired,
+  setStartDate: PropTypes.func.isRequired,
+  setEndDate: PropTypes.func.isRequired,
+}
+
+TimeSelect.defaultProps = {
+  time: null,
+  startDate: null,
+  endDate: null,
 }
 
 export default TimeSelect
