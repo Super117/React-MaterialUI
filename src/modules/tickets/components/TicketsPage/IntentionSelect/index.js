@@ -1,7 +1,6 @@
 import React from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import qs from 'query-string'
+import PropTypes from 'prop-types'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -17,30 +16,9 @@ const intents = [
   },
 ]
 
-const IntentionSelect = () => {
+const IntentionSelect = (props) => {
   const { formatMessage } = useIntl()
-
-  const { search } = useLocation()
-  const history = useHistory()
-
-  const parsedQueryStrings = qs.parse(search)
-
-  const { intent } = parsedQueryStrings
-
-  const changeIntent = (newIntent) => {
-    const newQueryStrings = {
-      ...parsedQueryStrings,
-      intent: newIntent,
-    }
-
-    if (!newIntent) {
-      delete newQueryStrings.intent
-    }
-
-    history.push({
-      search: qs.stringify(newQueryStrings),
-    })
-  }
+  const { intent, onSelect } = props
 
   return (
     <FilterSelect
@@ -62,7 +40,7 @@ const IntentionSelect = () => {
             withSelectionIcon
             width={194}
             onClick={() => {
-              changeIntent(null)
+              onSelect(null)
               closeDropdown()
             }}
           />
@@ -78,7 +56,7 @@ const IntentionSelect = () => {
                 width={194}
                 withSelectionIcon
                 onClick={() => {
-                  changeIntent(item.name)
+                  onSelect(item.name)
                   closeDropdown()
                 }}
               />
@@ -88,6 +66,15 @@ const IntentionSelect = () => {
       )}
     </FilterSelect>
   )
+}
+
+IntentionSelect.propTypes = {
+  intent: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+}
+
+IntentionSelect.defaultProps = {
+  intent: null,
 }
 
 export default IntentionSelect

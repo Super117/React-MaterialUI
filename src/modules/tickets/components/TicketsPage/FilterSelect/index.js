@@ -72,7 +72,7 @@ FilterSelect.propTypes = {
   children: PropTypes.func.isRequired,
   onClose: PropTypes.func,
   icon: PropTypes.node,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   menuTitle: PropTypes.string,
   placeholder: PropTypes.string,
   light: PropTypes.bool,
